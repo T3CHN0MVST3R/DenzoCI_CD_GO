@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.22.9'
+          go-version: '1.23' # Убедитесь, что версия Go соответствует установленной
 
       - name: Build
         run: go build -v ./...
@@ -32,5 +32,13 @@ jobs:
     needs: build-and-test
     if: success()
     steps:
+      - name: Check if Render Deploy Hook is set
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            echo "RENDER_DEPLOY_HOOK is not set!"
+            exit 1
+          else
+            echo "RENDER_DEPLOY_HOOK is set."
+          fi
       - name: Trigger Render Deploy Hook
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
